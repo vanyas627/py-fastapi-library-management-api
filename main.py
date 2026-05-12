@@ -45,7 +45,7 @@ def get_author_by_id(author_id: int, db: Session = Depends(get_db)):
 def create_book(author_id: int, data: schemas.BookCreate, db: Session = Depends(get_db)):
     author = crud.get_author_by_id(db=db,author_id=author_id)
     if author is None:
-        raise HTTPException(status_code=400, detail="You can't create a book for this author, because this author doesn't exist!")
+        raise HTTPException(status_code=404, detail="You can't create a book for this author, because this author doesn't exist!")
     return crud.create_book(db=db, data=data, author_id=author_id)
 
 
@@ -53,7 +53,7 @@ def create_book(author_id: int, data: schemas.BookCreate, db: Session = Depends(
 def get_book_by_id(book_id: int, db: Session = Depends(get_db)):
     book = crud.get_book_by_id(db=db, book_id=book_id)
     if book is None:
-        raise HTTPException(status_code=400, detail="Book not found!")
+        raise HTTPException(status_code=404, detail="Book not found!")
     return book
 
 @app.get("/books", response_model=list[schemas.BookRead])
@@ -62,7 +62,7 @@ def get_books(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     return books[skip: skip + limit]
 
 @app.get("/author/{author_id}/books", response_model=list[schemas.BookRead])
-def get_books(author_id: int, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def get_books_by_author(author_id: int, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     books = crud.get_books(db=db)
     if author_id is not None:
         books = [b for b in books if b.author_id == author_id]
