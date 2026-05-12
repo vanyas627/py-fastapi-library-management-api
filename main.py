@@ -37,7 +37,7 @@ def get_authors(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 def get_author_by_id(author_id: int, db: Session = Depends(get_db)):
     author = crud.get_author_by_id(db=db, author_id=author_id)
     if author is None:
-        raise HTTPException(status_code=400, detail=f"There is not author with id {author_id}")
+        raise HTTPException(status_code=404, detail=f"There is not author with id {author_id}")
     return author
 
 
@@ -57,8 +57,9 @@ def get_book_by_id(book_id: int, db: Session = Depends(get_db)):
     return book
 
 @app.get("/books", response_model=list[schemas.BookRead])
-def get_books(db: Session = Depends(get_db)):
-    return crud.get_books(db=db)
+def get_books(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    books = crud.get_books(db=db)
+    return books[skip: skip + limit]
 
 @app.get("/author/{author_id}/books", response_model=list[schemas.BookRead])
 def get_books(author_id: int, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
